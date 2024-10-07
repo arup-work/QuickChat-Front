@@ -1,23 +1,39 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from '../components/Auth/Login';
-import Register from '../components/Auth/Register';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "../components/Auth/Login";
+import Register from "../components/Auth/Register";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux";
+import Index from "../views/LandingPage/Index";
 
 const AppRoutes: React.FC = () => {
-    return(
-        <Router>
-            <Routes>
-                <Route
-                    path='/'
-                    element={<Login />}
-                ></Route>
-                <Route
-                    path='/register'
-                    element={<Register />}
-                ></Route>
-            </Routes>
-        </Router>
-    )
-}
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <Login /> : <Navigate to={"/"} />}
+        ></Route>
+        <Route
+          path="/register"
+          element={!isAuthenticated ? <Register /> : <Navigate to={"/"} />}
+        ></Route>
+        <Route
+          path="/"
+          element={isAuthenticated ? <Index /> : <Navigate to={"/login"} />}
+        ></Route>
+      </Routes>
+    </Router>
+  );
+};
 
 export default AppRoutes;

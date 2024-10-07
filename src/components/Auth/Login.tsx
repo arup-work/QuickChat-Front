@@ -11,6 +11,9 @@ import AuthService from "../../services/AuthService";
 import { ToastContainer } from "react-toastify";
 import { Link, useLocation } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
+import { useDispatch } from "react-redux";
+import { login, logout} from "../../redux/slices/AuthSlice";
+import { AppDispatch } from "../../redux";
 
 interface FormData {
   email: string;
@@ -30,6 +33,7 @@ const Login: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -64,7 +68,12 @@ const Login: React.FC = () => {
       return;
     }
 
-    await AuthService.login(formData.email, formData.password);
+    const response = await AuthService.login(formData.email, formData.password);
+    if (response) {
+      dispatch(login({
+        token: response.token, user: response.user
+      }))
+    }
     setFormData({
       email: "",
       password: "",
@@ -93,6 +102,7 @@ const Login: React.FC = () => {
         border: "1px solid #ccc", // Light gray border
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
         backgroundColor: "#fff", // Background color to make it stand out
+        marginTop: '60px'
       }}
     >
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">

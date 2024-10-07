@@ -21,6 +21,7 @@ const AuthService = {
           password
         });
         showSuccessToast(response.message);
+        return response;
     } catch (error: any) {
       console.log(error);
       
