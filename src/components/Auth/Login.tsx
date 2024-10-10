@@ -9,11 +9,12 @@ import {
 } from "@mui/material";
 import AuthService from "../../services/AuthService";
 import { ToastContainer } from "react-toastify";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
 import { useDispatch } from "react-redux";
-import { login, logout} from "../../redux/slices/AuthSlice";
+import { login} from "../../redux/slices/AuthSlice";
 import { AppDispatch } from "../../redux";
+import '../../assets/styles/Auth.css'
 
 interface FormData {
   email: string;
@@ -34,6 +35,7 @@ const Login: React.FC = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -73,6 +75,12 @@ const Login: React.FC = () => {
       dispatch(login({
         token: response.token, user: response.user
       }))
+      navigate("/", {
+        state: {
+          message: `Welcome back, ${response.user.name}`,
+          type: "success",
+        },
+      });
     }
     setFormData({
       email: "",
@@ -94,16 +102,7 @@ const Login: React.FC = () => {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{
-        width: 400,
-        margin: "auto",
-        padding: 3,
-        borderRadius: 2, // Rounded corners
-        border: "1px solid #ccc", // Light gray border
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
-        backgroundColor: "#fff", // Background color to make it stand out
-        marginTop: '60px'
-      }}
+      className="formBox"
     >
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">
         Login

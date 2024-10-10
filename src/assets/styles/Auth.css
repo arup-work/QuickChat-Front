@@ -1,0 +1,10 @@
+.formBox {
+    width: 400px;
+    margin: 60px auto;
+    padding: 16px;
+    border-radius: 8px; /* Rounded corners */
+    border: 1px solid #ccc; /* Light gray border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    background-color: #fff; /* Background color to make it stand out */
+  }
+  

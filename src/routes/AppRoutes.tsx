@@ -17,7 +17,7 @@ const AppRoutes: React.FC = () => {
   );
 
   return (
-    <Router>
+    <>
       <Routes>
         <Route
           path="/login"
@@ -32,7 +32,7 @@ const AppRoutes: React.FC = () => {
           element={isAuthenticated ? <Index /> : <Navigate to={"/login"} />}
         ></Route>
       </Routes>
-    </Router>
+    </>
   );
 };
 
