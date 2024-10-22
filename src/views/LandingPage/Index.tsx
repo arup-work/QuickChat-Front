@@ -2,11 +2,13 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { Box, Typography } from "@mui/material";
-import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
 import { useLocation } from "react-router-dom";
+import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
+import ChatIndex from "../../components/Chat/Index";
 
 const Index: React.FC = () => {
   const location = useLocation();
+
   useEffect(() => {
     if (location.state?.message) {
         if (location.state.type === 'success') {
@@ -35,6 +37,7 @@ const Index: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">
         Welcome back, {auth.user?.name}
       </Typography>
+      <ChatIndex />
     </Box>
   );
 };
