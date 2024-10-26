@@ -1,58 +1,62 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Avatar, Box, List, ListItem, ListItemText } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux";
+import UserService from "../../services/UserService";
+import "../../assets/styles/Chat.css";
+import ChatBox from "./ChatBox";
 
-// Define the type for your Socket.IO client
-let socket: Socket;
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+}
 
 const Index: React.FC = () => {
-  const [message, setMessage] = useState<string>("");
-  const [receivedMessage, setReceivedMessage] = useState<string>("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isChatBoxOpen, setChatBoxOpen] = useState<boolean>(false);
+  const [currentChatBox, setCurrentChatBox] = useState<User>({ _id: '', name: '', email: ''});
 
-  const sendMessageToServer = () => {
-    if (message.trim()) {
-        socket.emit('messageFromClient', message);
-        setMessage('');
+  const auth = useSelector((state: RootState) => state.auth.auth);
+
+  const fetchAllUsers = async () => {
+    if (auth.token) {
+      const response = await UserService.fetchAllUsers(auth.token);
+      const users = response.filter((user: User) => user._id !== auth.user?.id);
+      setUsers(users);
     }
-  }
+  };
+
+  const handleOpenChatBox = (user: User) => {
+    setChatBoxOpen(true);
+    setCurrentChatBox(user);
+  };
+
   useEffect(() => {
-    // Connect to the socket.io server
-    socket = io("http://localhost:8000");
-
-    // Listen from the message from the server
-    socket.on("message", (data: string) => {
-      setReceivedMessage(data);
-    });
-
-    // Clean up the component unmount
-    return () => {
-      socket.off("message");
-    };
+    fetchAllUsers();
   }, []);
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        mt: 5,
-      }}
-    >
-
-      <TextField
-        label="message"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        sx={{ mb: 2, width: "300px" }}
-      />
-      <Button variant="contained" color="primary" onClick={sendMessageToServer}>
-        Send Message
-      </Button>
-
-      <Typography variant="h6" sx={{ mt:4 }}>
-      Received Message:
-      </Typography>
-      <Typography variant="body1" >{receivedMessage}</Typography>
+    <Box className="chatBox">
+      {!isChatBoxOpen && (
+        <List sx={{ padding: 0 }}>
+          {users.map((user, index) => (
+            <ListItem
+              key={index}
+              className="chatList"
+              onClick={() => handleOpenChatBox(user)}
+            >
+              <Avatar alt={user.name} src={""} sx={{ marginRight: 2 }} />
+              <ListItemText
+                primary={user.name}
+                secondary={"Available"}
+                primaryTypographyProps={{ fontWeight: "bold" }}
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
+      {isChatBoxOpen && <ChatBox recipientUser={currentChatBox} />}
     </Box>
   );
 };

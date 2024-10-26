@@ -3,24 +3,31 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { Box, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "../../helpers/utils/toastUtils";
 import ChatIndex from "../../components/Chat/Index";
 
 const Index: React.FC = () => {
+  const auth = useSelector((state: RootState) => state.auth.auth);
   const location = useLocation();
+  const currentUser = auth.user?.id;
+  const recipientUser = "66e7ab9352b3ace269bb5fa4";
 
   useEffect(() => {
+    
     if (location.state?.message) {
-        if (location.state.type === 'success') {
-            showSuccessToast(location.state.message);
-        }else{
-            showErrorToast(location.state.message);
-        }
+      if (location.state.type === "success") {
+        showSuccessToast(location.state.message);
+      } else {
+        showErrorToast(location.state.message);
+      }
     }
-  },[location.state]);
+  }, [location.state]);
 
-  const auth = useSelector((state: RootState) => state.auth.auth);
   return (
+    <>
     <Box
       component="form"
       sx={{
@@ -37,8 +44,11 @@ const Index: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">
         Welcome back, {auth.user?.name}
       </Typography>
-      <ChatIndex />
     </Box>
+     {currentUser && (
+      <ChatIndex />
+    )}
+    </>
   );
 };
 
