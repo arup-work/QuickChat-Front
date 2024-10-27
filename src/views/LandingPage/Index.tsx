@@ -28,7 +28,7 @@ const Index: React.FC = () => {
 
   return (
     <>
-    <Box
+    {/* <Box
       component="form"
       sx={{
         width: 400,
@@ -44,7 +44,7 @@ const Index: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">
         Welcome back, {auth.user?.name}
       </Typography>
-    </Box>
+    </Box> */}
      {currentUser && (
       <ChatIndex />
     )}

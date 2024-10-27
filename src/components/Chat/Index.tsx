@@ -15,7 +15,11 @@ interface User {
 const Index: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isChatBoxOpen, setChatBoxOpen] = useState<boolean>(false);
-  const [currentChatBox, setCurrentChatBox] = useState<User>({ _id: '', name: '', email: ''});
+  const [currentChatBox, setCurrentChatBox] = useState<User>({
+    _id: "",
+    name: "",
+    email: "",
+  });
 
   const auth = useSelector((state: RootState) => state.auth.auth);
 
@@ -37,8 +41,8 @@ const Index: React.FC = () => {
   }, []);
 
   return (
-    <Box className="chatBox">
-      {!isChatBoxOpen && (
+    <Box className="container">
+      <Box className="userList">
         <List sx={{ padding: 0 }}>
           {users.map((user, index) => (
             <ListItem
@@ -55,8 +59,10 @@ const Index: React.FC = () => {
             </ListItem>
           ))}
         </List>
-      )}
-      {isChatBoxOpen && <ChatBox recipientUser={currentChatBox} />}
+      </Box>
+      <Box className="chatBox">
+        {isChatBoxOpen && <ChatBox recipientUser={currentChatBox} />}
+      </Box>
     </Box>
   );
 };

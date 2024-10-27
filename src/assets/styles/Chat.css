@@ -1,16 +1,53 @@
-.chatBox{
-    width: 600px;
-    margin-top: 4px;
-    margin: auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 3px;
-    box-shadow: "0 4px 12px rgba(0, 0, 0, 0.1)";
-    margin-top: 6px;
+.container {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.chatList{
-    padding: 10px 16px;
-    border-bottom: 1px solid #eee;
+.userList {
+  width: 350px; /* Fixed width for the user list */
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  height: 90vh;
+  padding: 8px;
+}
+
+.chatBox {
+  flex-grow: 1;
+  padding: 8px;
+  /* height: 100vh; */
+  overflow: auto;
+}
+.chatList {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.chatList:hover {
+  background-color: #f0f0f0;
+}
+
+.chatContainer{
+    display: flex;
+    flex-direction: column;
+    height: 86vh;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.messageList{
+    flex-grow: 1; /* Allows the message list to grow and take up available space */
+    overflow: auto;  /* Enables scrolling for messages */
+    padding: 8px;
+}
+
+.inputContainer{
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-top: 1px solid #ddd;
 }

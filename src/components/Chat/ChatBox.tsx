@@ -7,13 +7,16 @@ import {
   TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import SendIcon from "@mui/icons-material/Send";
+
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { RootState } from "../../redux";
+import MessageService from "../../services/MessageService";
 
 interface Message {
-  sender: string;
-  message: string;
+  senderId: string;
+  content: string;
 }
 interface User {
   _id: string;
@@ -47,10 +50,30 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
     }
   };
 
+  const fetchAllMessages = async () => {
+    if (auth.token) {
+      const response: Message[] = await MessageService.fetchAllMessage(
+        auth.token,
+        recipientUserId
+      );
+      setReceivedMessage((prevMessages) => [
+        ...prevMessages,
+        ...response.map((msg: Message) => ({
+          senderId: msg.senderId,
+          content: msg.content,
+        })),
+      ]);
+    }
+  };
+
   useEffect(() => {
-    
+    fetchAllMessages();
+
     // Join the room for one-to-one chat
-    socket.emit("joinRoom", { sender: currentUser, recipient: recipientUserId });
+    socket.emit("joinRoom", {
+      sender: currentUser,
+      recipient: recipientUserId,
+    });
 
     // Listen for incoming changes
     socket.on("message", (message: Message) => {
@@ -62,27 +85,34 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
     };
   }, [currentUser, recipientUserId]);
   return (
-    <Box className="chatBox">
-      <List sx={{ height: 300, overflowY: "auto", mb: 2 }}>
+    <Box className="chatContainer">
+      <List className="messageList">
         {receivedMessage.map((msg, index) => (
           <ListItem key={index}>
             <ListItemText
-              primary={msg.message}
-              secondary={msg.sender == currentUser ? "You" : recipientUserName}
+              primary={msg.content}
+              secondary={
+                msg.senderId == currentUser ? "You" : recipientUserName
+              }
             />
           </ListItem>
         ))}
       </List>
-      <TextField
-        label="message"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        fullWidth
-        sx={{ mb: 2, mr: 2 }}
-      />
-      <Button variant="contained" color="primary" onClick={sendMessageToServer}>
-        Send Message
-      </Button>
+      <Box className="inputContainer">
+        <TextField
+          label="Type a message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          fullWidth
+          sx={{ flex: 1 }}
+        />
+        <Button
+          onClick={sendMessageToServer}
+          sx={{ minWidth: "auto", padding: "12px", ml: 1 }}
+        >
+          <SendIcon />
+        </Button>
+      </Box>
     </Box>
   );
 };
