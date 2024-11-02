@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
-import { Box, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import {
   showErrorToast,
@@ -13,7 +12,6 @@ const Index: React.FC = () => {
   const auth = useSelector((state: RootState) => state.auth.auth);
   const location = useLocation();
   const currentUser = auth.user?.id;
-  const recipientUser = "66e7ab9352b3ace269bb5fa4";
 
   useEffect(() => {
     
