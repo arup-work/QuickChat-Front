@@ -64,3 +64,24 @@
   display: block;
   margin: 2px;
 }
+
+.emptyBox{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  /* background-color: #f0f0f0; */
+  flex-direction: column;
+}
+
+.openChatBox{
+  background-color: #f0f0f0;
+}
+
+.chatBoxNavbar{
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  background-color: #f0f0f0;
+}

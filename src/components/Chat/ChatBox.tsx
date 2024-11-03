@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   List,
@@ -60,6 +61,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   const currentUser = auth.user?.id;
   const recipientUserId = recipientUser._id;
   // const recipientUserName = recipientUser.name;
+  const currentUserName = auth.user?.name;
 
   // Send message to the socket server
   const sendMessageToServer = () => {
@@ -141,6 +143,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   }, [receivedMessage]);
   return (
     <Box className="chatContainer">
+      <Box className="chatBoxNavbar">
+        <Avatar alt={currentUserName} src={""} sx={{ marginRight: 2, marginLeft:2 }} />
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 'bold'}}>
+            {currentUserName}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'gray'}}>
+              Available
+          </Typography>
+        </Box>
+      </Box>
       <List className="messageList">
         {Object.keys(receivedMessage).map((date) => (
           <div key={date}>
