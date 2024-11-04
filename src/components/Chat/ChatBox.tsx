@@ -35,9 +35,6 @@ interface ChatBoxProps {
   recipientUser: User;
 }
 
-// Define the type for your Socket.IO client
-let socket: Socket = io("http://localhost:8000");
-
 // Utility function to group messages by date
 const groupMessagesByDate = (messages: Message[]) => {
   return messages.reduce((groups, msg) => {
@@ -60,8 +57,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
   const recipientUserId = recipientUser._id;
-  // const recipientUserName = recipientUser.name;
+  const recipientUserName = recipientUser.name;
   const currentUserName = auth.user?.name;
+
+  // Define the type for your Socket.IO client
+  let socket: Socket = io("http://localhost:8000" , {
+    query: {
+      userId: currentUser
+    }
+  });
 
   // Send message to the socket server
   const sendMessageToServer = () => {
@@ -144,13 +148,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   return (
     <Box className="chatContainer">
       <Box className="chatBoxNavbar">
-        <Avatar alt={currentUserName} src={""} sx={{ marginRight: 2, marginLeft:2 }} />
+        <Avatar
+          alt={currentUserName}
+          src={""}
+          sx={{ marginRight: 2, marginLeft: 2 }}
+        />
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 'bold'}}>
-            {currentUserName}
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            {recipientUserName}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'gray'}}>
-              Available
+          <Typography variant="body2" sx={{ color: "gray" }}>
+            Available
           </Typography>
         </Box>
       </Box>

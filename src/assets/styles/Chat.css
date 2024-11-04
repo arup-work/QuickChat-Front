@@ -76,12 +76,12 @@
 }
 
 .openChatBox{
-  background-color: #f0f0f0;
+  background-color: #d1cfcf;
 }
 
 .chatBoxNavbar{
   display: flex;
   align-items: center;
   padding: 3px;
-  background-color: #f0f0f0;
+  background-color: #e7e5e5;
 }
