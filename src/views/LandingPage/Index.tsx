@@ -14,7 +14,6 @@ const Index: React.FC = () => {
   const currentUser = auth.user?.id;
 
   useEffect(() => {
-    
     if (location.state?.message) {
       if (location.state.type === "success") {
         showSuccessToast(location.state.message);
@@ -26,7 +25,7 @@ const Index: React.FC = () => {
 
   return (
     <>
-    {/* <Box
+      {/* <Box
       component="form"
       sx={{
         width: 400,
@@ -43,9 +42,7 @@ const Index: React.FC = () => {
         Welcome back, {auth.user?.name}
       </Typography>
     </Box> */}
-     {currentUser && (
-      <ChatIndex />
-    )}
+      {currentUser && <ChatIndex/>}
     </>
   );
 };

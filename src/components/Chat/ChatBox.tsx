@@ -19,6 +19,7 @@ import {
   formatDateLabel,
   formatTimeLabel,
 } from "../../helpers/utils/dateUtils";
+import { getSocket } from "../../helpers/utils/socket";
 
 interface Message {
   senderId: string;
@@ -29,6 +30,8 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  lastSeen?: string | null; // Make lastSeen optional or nullable
+  status?: string; // Make status optional
 }
 
 interface ChatBoxProps {
@@ -59,17 +62,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   const recipientUserId = recipientUser._id;
   const recipientUserName = recipientUser.name;
   const currentUserName = auth.user?.name;
-
-  // Define the type for your Socket.IO client
-  let socket: Socket = io("http://localhost:8000" , {
-    query: {
-      userId: currentUser
-    }
-  });
+  const socket = getSocket(currentUser);
 
   // Send message to the socket server
   const sendMessageToServer = () => {
-    if (message.trim()) {
+    if (socket && message.trim()) {
       socket.emit("message", {
         sender: auth.user?.id,
         recipient: recipientUserId,
@@ -111,34 +108,36 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
   useEffect(() => {
     fetchAllMessages();
 
-    // Join the room for one-to-one chat
-    socket.emit("joinRoom", {
-      sender: currentUser,
-      recipient: recipientUserId,
-    });
-
-    // Listen for incoming changes
-    socket.on("message", (message: Message) => {
-      const date = new Date(message.createdAt).toISOString().split("T")[0];
-      setReceivedMessage((prevMessages) => {
-        //Copy the existing groups
-        const newMessages = { ...prevMessages };
-
-        // Check if the date group already exist, otherwise create it
-        if (!newMessages[date]) {
-          newMessages[date] = [];
-        }
-
-        // Append the new messages to the corrected date group
-        newMessages[date].push(message);
-
-        return newMessages;
+    if (socket) {
+      // Join the room for one-to-one chat
+      socket.emit("joinRoom", {
+        sender: currentUser,
+        recipient: recipientUserId,
       });
-    });
 
-    return () => {
-      socket.off("message");
-    };
+      // Listen for incoming changes
+      socket.on("message", (message: Message) => {
+        const date = new Date(message.createdAt).toISOString().split("T")[0];
+        setReceivedMessage((prevMessages) => {
+          //Copy the existing groups
+          const newMessages = { ...prevMessages };
+
+          // Check if the date group already exist, otherwise create it
+          if (!newMessages[date]) {
+            newMessages[date] = [];
+          }
+
+          // Append the new messages to the corrected date group
+          newMessages[date].push(message);
+
+          return newMessages;
+        });
+      });
+
+      return () => {
+        socket.off("message");
+      };
+    }
   }, [currentUser, recipientUserId]);
 
   // Scroll to the bottom of the message list when messages change
@@ -158,7 +157,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
             {recipientUserName}
           </Typography>
           <Typography variant="body2" sx={{ color: "gray" }}>
-            Available
+            {recipientUser.status === "online"
+                    ? "Online"
+                    : recipientUser.lastSeen
+                    ? `Last seen: ${new Date(recipientUser.lastSeen).toLocaleString()}`
+                    : "Offline"}
           </Typography>
         </Box>
       </Box>

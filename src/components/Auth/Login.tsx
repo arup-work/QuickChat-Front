@@ -10,11 +10,15 @@ import {
 import AuthService from "../../services/AuthService";
 import { ToastContainer } from "react-toastify";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { showErrorToast, showSuccessToast } from "../../helpers/utils/toastUtils";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "../../helpers/utils/toastUtils";
 import { useDispatch } from "react-redux";
-import { login} from "../../redux/slices/AuthSlice";
+import { login } from "../../redux/slices/AuthSlice";
 import { AppDispatch } from "../../redux";
-import '../../assets/styles/Auth.css'
+import "../../assets/styles/Auth.css";
+import { getSocket } from "../../helpers/utils/socket";
 
 interface FormData {
   email: string;
@@ -72,9 +76,21 @@ const Login: React.FC = () => {
 
     const response = await AuthService.login(formData.email, formData.password);
     if (response) {
-      dispatch(login({
-        token: response.token, user: response.user
-      }))
+      dispatch(
+        login({
+          token: response.token,
+          user: response.user,
+        })
+      );
+
+      // After successful login
+      const socket = getSocket(response.user._id);
+      if (socket) {
+        socket.on("connect", () => {
+          console.log("Socket connected:", socket.id);
+        });
+      }
+
       navigate("/", {
         state: {
           message: `Welcome back, ${response.user.name}`,
@@ -90,20 +106,16 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (location.state?.message) {
-        if (location.state.type === 'success') {
-            showSuccessToast(location.state.message);
-        }else{
-            showErrorToast(location.state.message);
-        }
+      if (location.state.type === "success") {
+        showSuccessToast(location.state.message);
+      } else {
+        showErrorToast(location.state.message);
+      }
     }
-  },[location.state]);
+  }, [location.state]);
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      className="formBox"
-    >
+    <Box component="form" onSubmit={handleSubmit} className="formBox">
       <Typography variant="h4" component="h1" gutterBottom textAlign="center">
         Login
       </Typography>

@@ -13,12 +13,14 @@ import { logout } from "../../redux/slices/AuthSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { disconnectSocket } from "../../helpers/utils/socket";
 
 const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleLogout = () => {
     dispatch(logout());
+    disconnectSocket();
     navigate("/login", {
         state: {
           message: 'You have been logged out successfully!',
@@ -31,7 +33,7 @@ const Navbar: React.FC = () => {
       <Toolbar>
         <Box display="flex" alignItems="center"  component={Link} to={"/"}  style={{ textDecoration: 'none', color: 'inherit' }}>
           <img
-            src="src/assets/react.svg" // Replace with your logo path
+            src="src/assets/chat.jpg" // Replace with your logo path
             alt="Logo"
             style={{ height: "40px", marginRight: "10px" }} // Adjust height as needed
           />
