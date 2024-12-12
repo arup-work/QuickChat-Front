@@ -12,7 +12,6 @@ import React, { useEffect, useRef, useState } from "react";
 import SendIcon from "@mui/icons-material/Send";
 
 import { useSelector } from "react-redux";
-import { io, Socket } from "socket.io-client";
 import { RootState } from "../../redux";
 import MessageService from "../../services/MessageService";
 import {
@@ -20,6 +19,7 @@ import {
   formatTimeLabel,
 } from "../../helpers/utils/dateUtils";
 import { getSocket } from "../../helpers/utils/socket";
+import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 
 interface Message {
   senderId: string;
@@ -34,8 +34,15 @@ interface User {
   status?: string; // Make status optional
 }
 
+interface UserStatus {
+  userId: string;
+  lastSeen: string | null; // Allow null values;
+  status: string;
+}
+
 interface ChatBoxProps {
   recipientUser: User;
+  userStatus: UserStatus;
 }
 
 // Utility function to group messages by date
@@ -50,7 +57,7 @@ const groupMessagesByDate = (messages: Message[]) => {
   }, {} as Record<string, Message[]>);
 };
 
-const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus }) => {
   const [message, setMessage] = useState<string>("");
   const [receivedMessage, setReceivedMessage] = useState<
     Record<string, Message[]>
@@ -140,6 +147,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
     }
   }, [currentUser, recipientUserId]);
 
+  useEffect(() => {
+    console.log("User status updated:", userStatus);
+  }, [userStatus]);
+
   // Scroll to the bottom of the message list when messages change
   useEffect(() => {
     endOfMessageRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -157,11 +168,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser }) => {
             {recipientUserName}
           </Typography>
           <Typography variant="body2" sx={{ color: "gray" }}>
-            {recipientUser.status === "online"
-                    ? "Online"
-                    : recipientUser.lastSeen
-                    ? `Last seen: ${new Date(recipientUser.lastSeen).toLocaleString()}`
-                    : "Offline"}
+            {userStatus.status === "online"
+              ? "Online"
+              : userStatus.lastSeen
+              ? `Last seen ${formatLastSeen(new Date(userStatus.lastSeen))}`
+              : "Offline"}
           </Typography>
         </Box>
       </Box>

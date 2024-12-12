@@ -14,6 +14,14 @@ import "../../assets/styles/Chat.css";
 import ChatBox from "./ChatBox";
 import { io, Socket } from "socket.io-client";
 import { getSocket } from "../../helpers/utils/socket";
+import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
+import MessageService from "../../services/MessageService";
+
+interface Message {
+  senderId: string;
+  content: string;
+  createdAt: string;
+}
 
 interface User {
   _id: string;
@@ -39,6 +47,9 @@ const Index: React.FC = () => {
   const [userStatuses, setUserStatuses] = useState<Record<string, UserStatus>>(
     {}
   );
+  const [receivedMessage, setReceivedMessage] = useState<
+    Record<string, Message[]>
+  >({});
 
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
@@ -72,13 +83,42 @@ const Index: React.FC = () => {
     }
   };
 
-  const handleOpenChatBox = (user: User & { status: string; lastSeen?: string | null }) => {
+  const fetchAllMessagesForUsers = async () => {
+    if (auth.token) {
+      const response: Message[] = await MessageService.fetchAllUsersLatMessages(
+        auth.token
+      );
+      console.log(response);
+      
+
+      // Extract the latest message for each user
+      // const lastMessages = response.reduce<Record<string, Message | null>>(
+      //   (acc, msg) => {
+      //     if (
+      //       !acc[msg.senderId] ||
+      //       new Date(acc[msg.senderId]!.createdAt) < new Date(msg.createdAt)
+      //     ) {
+      //       acc[msg.senderId] = msg;
+      //     }
+      //     return acc;
+      //   },
+      //   {}
+      // );
+
+      // setReceivedMessage(lastMessages);
+    }
+  };
+
+  const handleOpenChatBox = (
+    user: User & { status: string; lastSeen?: string | null }
+  ) => {
     setChatBoxOpen(true);
     setCurrentChatBox(user);
   };
 
   useEffect(() => {
     fetchAllUsers();
+    fetchAllMessagesForUsers();
   }, []);
 
   useEffect(() => {
@@ -128,7 +168,7 @@ const Index: React.FC = () => {
                   user.status === "online"
                     ? "Online"
                     : user.lastSeen
-                    ? `Last seen: ${new Date(user.lastSeen).toLocaleString()}`
+                    ? `Last seen ${formatLastSeen(new Date(user.lastSeen))}`
                     : "Offline"
                 }
                 primaryTypographyProps={{ fontWeight: "bold" }}
@@ -154,7 +194,15 @@ const Index: React.FC = () => {
           </>
         )}
         {isChatBoxOpen && (
-          <ChatBox recipientUser={currentChatBox}/>
+          <ChatBox
+            recipientUser={currentChatBox}
+            userStatus={
+              userStatuses[currentChatBox._id] || {
+                status: "unknown",
+                lastSeen: null,
+              }
+            }
+          />
         )}
       </Box>
     </Box>
