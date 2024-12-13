@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-export const formatLastSeen = (lastSeen: Date) => {
+export const formatLastSeen = (lastSeen: Date, insideChat: boolean) => {
   const now = new Date();
   const lastSeenDate = new Date(lastSeen);
 
@@ -10,6 +10,9 @@ export const formatLastSeen = (lastSeen: Date) => {
     lastSeen.getMonth() === now.getMonth() &&
     lastSeen.getFullYear === now.getFullYear
   ) {
+    if (!insideChat) {
+      return "hh:mm a";
+    }
     return `today at ${format(lastSeenDate, "hh:mm a")}`;
   }
 
@@ -21,7 +24,14 @@ export const formatLastSeen = (lastSeen: Date) => {
     lastSeenDate.getMonth() === yesterday.getMonth() &&
     lastSeenDate.getFullYear() === yesterday.getFullYear()
   ) {
+    if (!insideChat) {
+      return "yesterday";
+    }
     return `yesterday at ${format(lastSeenDate, "hh:mm a")}`;
+  }
+
+  if (!insideChat) {
+    return format(lastSeenDate, "dd/MM/yyyy");
   }
 
   // Older dates

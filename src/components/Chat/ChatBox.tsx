@@ -171,7 +171,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus }) => {
             {userStatus.status === "online"
               ? "Online"
               : userStatus.lastSeen
-              ? `Last seen ${formatLastSeen(new Date(userStatus.lastSeen))}`
+              ? `Last seen ${formatLastSeen(new Date(userStatus.lastSeen), true)}`
               : "Offline"}
           </Typography>
         </Box>

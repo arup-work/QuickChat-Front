@@ -17,11 +17,16 @@ import { getSocket } from "../../helpers/utils/socket";
 import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 import MessageService from "../../services/MessageService";
 
-interface Message {
-  senderId: string;
-  content: string;
+interface LastMessage {
+  userId: string;
+  lastMessage: string;
   createdAt: string;
 }
+
+type MessagesMap = Record<
+  string, 
+  { lastMessage: string; createdAt: string }
+>;
 
 interface User {
   _id: string;
@@ -47,9 +52,8 @@ const Index: React.FC = () => {
   const [userStatuses, setUserStatuses] = useState<Record<string, UserStatus>>(
     {}
   );
-  const [receivedMessage, setReceivedMessage] = useState<
-    Record<string, Message[]>
-  >({});
+  const [lastMessages, setLastMessages] = useState<MessagesMap>({});
+
 
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
@@ -85,27 +89,17 @@ const Index: React.FC = () => {
 
   const fetchAllMessagesForUsers = async () => {
     if (auth.token) {
-      const response: Message[] = await MessageService.fetchAllUsersLatMessages(
-        auth.token
+      const response: LastMessage[] = await MessageService.fetchAllUsersLatMessages(auth.token);      
+      // Transform array into an object for quick lookup
+      const messagesMap = response.reduce(
+        (acc: MessagesMap, { userId, lastMessage, createdAt }: LastMessage) => ({
+          ...acc,
+          [userId]: { lastMessage, createdAt },
+        }),
+        {} as MessagesMap// Initial empty object
       );
-      console.log(response);
-      
 
-      // Extract the latest message for each user
-      // const lastMessages = response.reduce<Record<string, Message | null>>(
-      //   (acc, msg) => {
-      //     if (
-      //       !acc[msg.senderId] ||
-      //       new Date(acc[msg.senderId]!.createdAt) < new Date(msg.createdAt)
-      //     ) {
-      //       acc[msg.senderId] = msg;
-      //     }
-      //     return acc;
-      //   },
-      //   {}
-      // );
-
-      // setReceivedMessage(lastMessages);
+      setLastMessages(messagesMap);
     }
   };
 
@@ -147,7 +141,12 @@ const Index: React.FC = () => {
     ...user,
     status: userStatuses[user._id]?.status || "unknown",
     lastSeen: userStatuses[user._id]?.lastSeen || null,
+    lastMessage: lastMessages[user._id]?.lastMessage || null,
+    messageTime: lastMessages[user._id]?.createdAt,
   }));
+
+  console.log(usersWithStatuses);
+  
 
   return (
     <Box className="container">
@@ -165,10 +164,12 @@ const Index: React.FC = () => {
               <ListItemText
                 primary={user.name}
                 secondary={
-                  user.status === "online"
+                  user.lastMessage
+                    ? `${user.lastMessage}`
+                    : user.status === "online"
                     ? "Online"
                     : user.lastSeen
-                    ? `Last seen ${formatLastSeen(new Date(user.lastSeen))}`
+                    ?  `Last seen ${formatLastSeen(new Date(user.lastSeen), false)}`
                     : "Offline"
                 }
                 primaryTypographyProps={{ fontWeight: "bold" }}
