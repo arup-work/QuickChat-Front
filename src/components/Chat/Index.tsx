@@ -12,21 +12,24 @@ import { RootState } from "../../redux";
 import UserService from "../../services/UserService";
 import "../../assets/styles/Chat.css";
 import ChatBox from "./ChatBox";
-import { io, Socket } from "socket.io-client";
 import { getSocket } from "../../helpers/utils/socket";
 import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 import MessageService from "../../services/MessageService";
 
 interface LastMessage {
-  userId: string;
+  conversationId: string;
   lastMessage: string;
-  createdAt: string;
+  createdAt: string; // ISO string for date
+  users: string[]; // Array of user IDs (sender and recipient)
 }
 
-type MessagesMap = Record<
-  string, 
-  { lastMessage: string; createdAt: string }
->;
+interface MessagesMap {
+  [conversationId: string]: {
+    lastMessage: string;
+    createdAt: string;
+    users: string[];
+  };
+}
 
 interface User {
   _id: string;
@@ -89,19 +92,23 @@ const Index: React.FC = () => {
 
   const fetchAllMessagesForUsers = async () => {
     if (auth.token) {
-      const response: LastMessage[] = await MessageService.fetchAllUsersLatMessages(auth.token);      
+      const response: LastMessage[] = await MessageService.fetchAllUsersLatMessages(auth.token);
+  
       // Transform array into an object for quick lookup
       const messagesMap = response.reduce(
-        (acc: MessagesMap, { userId, lastMessage, createdAt }: LastMessage) => ({
+        (acc: MessagesMap, { conversationId, lastMessage, createdAt, users }: LastMessage) => ({
           ...acc,
-          [userId]: { lastMessage, createdAt },
+          [conversationId]: { lastMessage, createdAt, users },
         }),
-        {} as MessagesMap// Initial empty object
+        {} as MessagesMap // Initial empty object
       );
-
+  
+      console.log(messagesMap); // Debugging to verify the transformed object
+  
       setLastMessages(messagesMap);
     }
   };
+  
 
   const handleOpenChatBox = (
     user: User & { status: string; lastSeen?: string | null }
@@ -137,13 +144,22 @@ const Index: React.FC = () => {
   }, []);
 
   // Combine user data with their status
-  const usersWithStatuses = users.map((user) => ({
-    ...user,
-    status: userStatuses[user._id]?.status || "unknown",
-    lastSeen: userStatuses[user._id]?.lastSeen || null,
-    lastMessage: lastMessages[user._id]?.lastMessage || null,
-    messageTime: lastMessages[user._id]?.createdAt,
-  }));
+  const usersWithStatuses = users.map((user) => {
+    const conversation = Object.values(lastMessages).find(({ users }) =>
+      users.includes(user._id) && users.includes(auth.user?.id as string)
+    );
+  
+    return {
+      ...user,
+      status: userStatuses[user._id]?.status || "unknown",
+      lastSeen: userStatuses[user._id]?.lastSeen || null,
+      lastMessage: conversation?.lastMessage || null,
+      messageTime: conversation?.createdAt || null,
+    };
+  });
+  
+
+  
 
   console.log(usersWithStatuses);
   
