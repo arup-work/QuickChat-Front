@@ -57,7 +57,6 @@ const Index: React.FC = () => {
   );
   const [lastMessages, setLastMessages] = useState<MessagesMap>({});
 
-
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
 
@@ -90,24 +89,68 @@ const Index: React.FC = () => {
     }
   };
 
+  // Handle latest message
+  const handleSendMessage = (message: string, recipientId: string) => {
+    // Send the message to the server
+    const socket = getSocket(currentUser);
+    if (socket) {
+      socket.emit("message", {
+        sender: currentUser,
+        recipient: recipientId,
+        message,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    // Update the local state for lastMessages
+    updateLastMessage(recipientId, message);
+  };
+
+  const updateLastMessage = (recipientId: string, message: string) => {
+    if (currentUser) {
+      const conversationId =
+        Object.keys(lastMessages).find(
+          (key) =>
+            lastMessages[key].users.includes(recipientId) &&
+            lastMessages[key].users.includes(currentUser)
+        ) || "";
+        
+      const newMessageData = {
+        lastMessage: message,
+        createdAt: new Date().toISOString(),
+        users: [currentUser, recipientId],
+      };
+
+      setLastMessages((prevLastMessages) => ({
+        ...prevLastMessages,
+        [conversationId || `new-${recipientId}`]: conversationId
+          ? { ...prevLastMessages[conversationId], ...newMessageData }
+          : newMessageData,
+      }));
+    }
+  };
+
   const fetchAllMessagesForUsers = async () => {
     if (auth.token) {
-      const response: LastMessage[] = await MessageService.fetchAllUsersLatMessages(auth.token);
-  
+      const response: LastMessage[] =
+        await MessageService.fetchAllUsersLatMessages(auth.token);
+
       // Transform array into an object for quick lookup
       const messagesMap = response.reduce(
-        (acc: MessagesMap, { conversationId, lastMessage, createdAt, users }: LastMessage) => ({
+        (
+          acc: MessagesMap,
+          { conversationId, lastMessage, createdAt, users }: LastMessage
+        ) => ({
           ...acc,
           [conversationId]: { lastMessage, createdAt, users },
         }),
         {} as MessagesMap // Initial empty object
       );
-  
-      console.log(messagesMap); // Debugging to verify the transformed object
-  
+
       setLastMessages(messagesMap);
     }
   };
+
   
 
   const handleOpenChatBox = (
@@ -145,10 +188,11 @@ const Index: React.FC = () => {
 
   // Combine user data with their status
   const usersWithStatuses = users.map((user) => {
-    const conversation = Object.values(lastMessages).find(({ users }) =>
-      users.includes(user._id) && users.includes(auth.user?.id as string)
+    const conversation = Object.values(lastMessages).find(
+      ({ users }) =>
+        users.includes(user._id) && users.includes(auth.user?.id as string)
     );
-  
+
     return {
       ...user,
       status: userStatuses[user._id]?.status || "unknown",
@@ -157,12 +201,6 @@ const Index: React.FC = () => {
       messageTime: conversation?.createdAt || null,
     };
   });
-  
-
-  
-
-  console.log(usersWithStatuses);
-  
 
   return (
     <Box className="container">
@@ -185,7 +223,10 @@ const Index: React.FC = () => {
                     : user.status === "online"
                     ? "Online"
                     : user.lastSeen
-                    ?  `Last seen ${formatLastSeen(new Date(user.lastSeen), false)}`
+                    ? `Last seen ${formatLastSeen(
+                        new Date(user.lastSeen),
+                        false
+                      )}`
                     : "Offline"
                 }
                 primaryTypographyProps={{ fontWeight: "bold" }}
@@ -218,6 +259,9 @@ const Index: React.FC = () => {
                 status: "unknown",
                 lastSeen: null,
               }
+            }
+            onSendMessage={(message) =>
+              handleSendMessage(message, currentChatBox._id)
             }
           />
         )}

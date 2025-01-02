@@ -43,6 +43,7 @@ interface UserStatus {
 interface ChatBoxProps {
   recipientUser: User;
   userStatus: UserStatus;
+  onSendMessage: (message: string) => void;
 }
 
 // Utility function to group messages by date
@@ -57,7 +58,7 @@ const groupMessagesByDate = (messages: Message[]) => {
   }, {} as Record<string, Message[]>);
 };
 
-const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMessage }) => {
   const [message, setMessage] = useState<string>("");
   const [receivedMessage, setReceivedMessage] = useState<
     Record<string, Message[]>
@@ -74,11 +75,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus }) => {
   // Send message to the socket server
   const sendMessageToServer = () => {
     if (socket && message.trim()) {
-      socket.emit("message", {
-        sender: auth.user?.id,
-        recipient: recipientUserId,
-        message,
-      });
+      onSendMessage(message);
       setMessage("");
     }
   };
@@ -179,7 +176,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus }) => {
       <List className="messageList">
         {Object.keys(receivedMessage).map((date) => (
           <div key={date}>
-            <Typography variant="h6" sx={{ marginTop: 2, textAlign: "center" }}>
+            <Typography variant="body2" sx={{ marginTop: 2, textAlign: "center", color: "gray" }}>
               {formatDateLabel(date)}
             </Typography>
             {receivedMessage[date].map((msg, index) => (
