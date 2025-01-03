@@ -8,6 +8,10 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import ChatIcon from "@mui/icons-material/Chat";
+import SettingsIcon from "@mui/icons-material/Settings";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
 import { RootState } from "../../redux";
 import UserService from "../../services/UserService";
 import "../../assets/styles/Chat.css";
@@ -56,6 +60,7 @@ const Index: React.FC = () => {
     {}
   );
   const [lastMessages, setLastMessages] = useState<MessagesMap>({});
+  const [activeMenu, setActiveMenu] = useState("chat");
 
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
@@ -114,7 +119,7 @@ const Index: React.FC = () => {
             lastMessages[key].users.includes(recipientId) &&
             lastMessages[key].users.includes(currentUser)
         ) || "";
-        
+
       const newMessageData = {
         lastMessage: message,
         createdAt: new Date().toISOString(),
@@ -151,13 +156,15 @@ const Index: React.FC = () => {
     }
   };
 
-  
-
   const handleOpenChatBox = (
     user: User & { status: string; lastSeen?: string | null }
   ) => {
     setChatBoxOpen(true);
     setCurrentChatBox(user);
+  };
+
+  const handleIconClick = (menu: string) => {
+    setActiveMenu(menu);
   };
 
   useEffect(() => {
@@ -204,37 +211,77 @@ const Index: React.FC = () => {
 
   return (
     <Box className="container">
-      <Box className="userList">
-        <List sx={{ padding: 0 }}>
-          {usersWithStatuses.map((user, index) => (
-            <ListItem
-              key={index}
-              className={`chatList ${
-                currentChatBox._id === user._id ? "openChatBox" : ""
-              }`}
-              onClick={() => handleOpenChatBox(user)}
-            >
-              <Avatar alt={user.name} src={""} sx={{ marginRight: 2 }} />
-              <ListItemText
-                primary={user.name}
-                secondary={
-                  user.lastMessage
-                    ? `${user.lastMessage}`
-                    : user.status === "online"
-                    ? "Online"
-                    : user.lastSeen
-                    ? `Last seen ${formatLastSeen(
-                        new Date(user.lastSeen),
-                        false
-                      )}`
-                    : "Offline"
-                }
-                primaryTypographyProps={{ fontWeight: "bold" }}
-              />
-            </ListItem>
-          ))}
-        </List>
+      <Box className="sidebar">
+        <Box className="sidebar__menu">
+          <Box
+            className={`sidebar__menu-item ${
+              activeMenu === "chat" ? "sidebar__menu-item--active" : ""
+            }`}
+            onClick={() => handleIconClick("chat")}
+          >
+            <ChatIcon />
+          </Box>
+        </Box>
+        <Box className="sidebar__menu-bottom">
+          <Box
+            className={`sidebar__menu-item ${
+              activeMenu === "settings" ? "sidebar__menu-item--active" : ""
+            }`}
+            onClick={() => handleIconClick("settings")}
+          >
+            <SettingsIcon />
+          </Box>
+        </Box>
       </Box>
+
+      {activeMenu === "chat" && (
+        <Box className="userList">
+          <List sx={{ padding: 0 }}>
+            {usersWithStatuses.map((user, index) => (
+              <ListItem
+                key={index}
+                className={`chatList ${
+                  currentChatBox._id === user._id ? "openChatBox" : ""
+                }`}
+                onClick={() => handleOpenChatBox(user)}
+              >
+                <Avatar alt={user.name} src={""} sx={{ marginRight: 2 }} />
+                <ListItemText
+                  primary={user.name}
+                  secondary={
+                    user.lastMessage
+                      ? `${user.lastMessage}`
+                      : user.status === "online"
+                      ? "Online"
+                      : user.lastSeen
+                      ? `Last seen ${formatLastSeen(
+                          new Date(user.lastSeen),
+                          false
+                        )}`
+                      : "Offline"
+                  }
+                  primaryTypographyProps={{ fontWeight: "bold" }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
+
+      {activeMenu === "settings" && (
+        <Box className="sidebar__settings">
+          <Typography variant="h6" className="sidebar__settings-title">
+            Settings
+          </Typography>
+
+          <Box className="sidebar__settings-item">
+            <AccountCircleIcon className="sidebar__settings-icon" />
+            <Typography className="sidebar__settings-item-text">
+              Account
+            </Typography>
+          </Box>
+        </Box>
+      )}
       <Box className="chatBox">
         {!isChatBoxOpen && (
           <>

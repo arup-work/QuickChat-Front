@@ -85,3 +85,63 @@
   padding: 3px;
   background-color: #e7e5e5;
 }
+
+.sidebar {
+  width: 60px;
+  height: 87vh;
+  border-right: 1px solid #ddd;
+  padding: 8px;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar__menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__menu-item {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  cursor: pointer; /* Adds a pointer cursor for clickability */
+}
+
+.sidebar__menu-item--active {
+  background-color: #e5dfdf; /* Active state background color */
+  border: 2px solid #ccc;
+}
+
+.sidebar__settings{
+  width: 350px; /* Fixed width for the user list */
+  border-right: 1px solid #ddd;
+  padding: 8px;
+}
+
+.sidebar__settings-title {
+  font-weight: bold !important; /* Makes the title bold */
+  font-size: 1.25rem !important; /* Increases font size slightly */
+  color: #333; /* Dark text color for better readability */
+}
+
+.sidebar__settings-item {
+  display: flex; /* Aligns the icon and text horizontally */
+  align-items: center; /* Vertically centers the icon and text */
+  margin-top: 12px; /* Adds spacing between items and the title */
+}
+
+.sidebar__settings-icon {
+  font-size: 6rem; /* Adjusts icon size */
+  color: #e5dfdf; /* Adds a green color to the icon */
+  margin-right: 8px; /* Spacing between the icon and text */
+}
+
+/*  */
+
+

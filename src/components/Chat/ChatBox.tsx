@@ -21,6 +21,8 @@ import {
 import { getSocket } from "../../helpers/utils/socket";
 import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 
+
+const TYPING_TIMEOUT = 3000; // 3 seconds timeout for detecting stop typing
 interface Message {
   senderId: string;
   content: string;
@@ -58,11 +60,18 @@ const groupMessagesByDate = (messages: Message[]) => {
   }, {} as Record<string, Message[]>);
 };
 
-const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMessage }) => {
+
+const ChatBox: React.FC<ChatBoxProps> = ({
+  recipientUser,
+  userStatus,
+  onSendMessage,
+}) => {
   const [message, setMessage] = useState<string>("");
   const [receivedMessage, setReceivedMessage] = useState<
     Record<string, Message[]>
   >({});
+  const [isTyping, setIsTyping] = useState(false);
+
   const endOfMessageRef = useRef<HTMLDivElement>(null); // Create a ref for scrolling
 
   const auth = useSelector((state: RootState) => state.auth.auth);
@@ -77,6 +86,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
     if (socket && message.trim()) {
       onSendMessage(message);
       setMessage("");
+      handleStopTyping();
     }
   };
 
@@ -109,6 +119,34 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
     }
   };
 
+  const handleTyping = () => {
+    if (socket) {
+      socket.emit("typing", {
+        sender: currentUser,
+        recipient: recipientUserId,
+      });
+    }
+  };
+
+  const handleStopTyping = () => {
+    if (socket) {
+      socket.emit("stopTyping", {
+        sender: currentUser,
+        recipient: recipientUserId,
+      });
+    }
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setMessage(text);
+    if (text.trim()) {
+      handleTyping();
+    } else {
+      handleStopTyping();
+    }
+  };
+
   useEffect(() => {
     fetchAllMessages();
 
@@ -138,15 +176,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
         });
       });
 
+      // Listen for typing events from the server
+      socket.on("userTyping", ({ sender }) => {
+        if (sender === recipientUserId) {
+          setIsTyping(true);
+        }
+      });
+
+      socket.on("userStoppedTyping", ({ sender }) => {
+        if (sender === recipientUserId) {
+          setIsTyping(false);
+        }
+      });
+
       return () => {
         socket.off("message");
+        socket.off("userTyping");
+        socket.off("userStoppedTyping");
       };
     }
   }, [currentUser, recipientUserId]);
-
-  useEffect(() => {
-    console.log("User status updated:", userStatus);
-  }, [userStatus]);
 
   // Scroll to the bottom of the message list when messages change
   useEffect(() => {
@@ -164,11 +213,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
             {recipientUserName}
           </Typography>
-          <Typography variant="body2" sx={{ color: "gray" }}>
-            {userStatus.status === "online"
+          <Typography
+            variant="body2"
+            sx={{
+              color: isTyping ? "#4CAF50" : "gray", // WhatsApp green for typing, gray for status
+              fontStyle: isTyping ? "italic" : "normal", // Optional: Make typing indicator italic
+            }}
+          >
+            {isTyping
+              ? "typing..."
+              : userStatus.status === "online"
               ? "Online"
               : userStatus.lastSeen
-              ? `Last seen ${formatLastSeen(new Date(userStatus.lastSeen), true)}`
+              ? `Last seen ${formatLastSeen(
+                  new Date(userStatus.lastSeen),
+                  true
+                )}`
               : "Offline"}
           </Typography>
         </Box>
@@ -176,7 +236,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
       <List className="messageList">
         {Object.keys(receivedMessage).map((date) => (
           <div key={date}>
-            <Typography variant="body2" sx={{ marginTop: 2, textAlign: "center", color: "gray" }}>
+            <Typography
+              variant="body2"
+              sx={{ marginTop: 2, textAlign: "center", color: "gray" }}
+            >
               {formatDateLabel(date)}
             </Typography>
             {receivedMessage[date].map((msg, index) => (
@@ -214,8 +277,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ recipientUser, userStatus, onSendMess
         <TextField
           label="Type a message"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleMessageChange}
           onKeyDown={handleKeyDown}
+          onBlur={handleStopTyping}
           fullWidth
           sx={{ flex: 1 }}
         />
