@@ -19,6 +19,7 @@ import ChatBox from "./ChatBox";
 import { getSocket } from "../../helpers/utils/socket";
 import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 import MessageService from "../../services/MessageService";
+import Profile from "./Profile";
 
 interface LastMessage {
   conversationId: string;
@@ -61,6 +62,7 @@ const Index: React.FC = () => {
   );
   const [lastMessages, setLastMessages] = useState<MessagesMap>({});
   const [activeMenu, setActiveMenu] = useState("chat");
+  const [activeSubMenu, setActiveSubMenu] = useState("");
 
   const auth = useSelector((state: RootState) => state.auth.auth);
   const currentUser = auth.user?.id;
@@ -165,6 +167,11 @@ const Index: React.FC = () => {
 
   const handleIconClick = (menu: string) => {
     setActiveMenu(menu);
+    setActiveSubMenu("");
+  };
+
+  const handleSubMenuClick = (menu: string) => {
+    setActiveSubMenu(menu);
   };
 
   useEffect(() => {
@@ -268,20 +275,30 @@ const Index: React.FC = () => {
         </Box>
       )}
 
-      {activeMenu === "settings" && (
+      {activeMenu === "settings" && !activeSubMenu && (
         <Box className="sidebar__settings">
           <Typography variant="h6" className="sidebar__settings-title">
             Settings
           </Typography>
 
-          <Box className="sidebar__settings-item">
+          <Box
+            className="sidebar__settings-item"
+            onClick={() => handleSubMenuClick("profile")}
+          >
             <AccountCircleIcon className="sidebar__settings-icon" />
-            <Typography className="sidebar__settings-item-text">
-              Account
-            </Typography>
+            <Box className="sidebar__settings-item-text-container">
+              <Typography className="sidebar__settings-item-text">
+                Profile
+              </Typography>
+            </Box>
           </Box>
         </Box>
       )}
+
+      {activeSubMenu === "profile" && (
+        <Profile handleMenuClick={handleIconClick} />
+      )}
+
       <Box className="chatBox">
         {!isChatBoxOpen && (
           <>
