@@ -2,11 +2,11 @@ import apiRequest from "../helpers/utils/api";
 import { showErrorToast } from "../helpers/utils/toastUtils";
 
 const ProfileService = {
-  updateProfileName: async (token: string, name: string) => {
+  updateProfileName: async (token: string, userId: string, name: string) => {
     try {
       const bearerToken = { Authorization: `Bearer ${token}` };
       const response = await apiRequest(
-        `user/update-name`,
+        `user/update-name/${userId}`,
         "POST",
         { name },
         bearerToken

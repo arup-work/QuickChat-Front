@@ -200,6 +200,7 @@
 }
 
 .sidebar__settings-profile-picture {
+  position: relative; /* Required for positioning the hover text */
   width: 200px; /* Set the size of the profile picture */
   height: 200px; /* Ensure the height matches the width for a perfect circle */
   border-radius: 50%; /* Makes the box circular */
@@ -210,6 +211,29 @@
   justify-content: center; /* Center horizontally */
   background-color: #f0f0f0; /* Light gray background for empty state */
   margin: 5%;
+  cursor: pointer; /* Changes the cursor to indicate interactivity */
+}
+
+.sidebar__settings-profile-hover-text {
+  position: absolute; /* Allows positioning over the image */;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent gray background */
+  color: white; /* White text for contrast */
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.3s ease-in-out; /* Smooth fade-in effect */
+  text-align: center;
+}
+
+.sidebar__settings-profile-picture:hover .sidebar__settings-profile-hover-text {
+  opacity: 1; /* Show the text on hover */
 }
 
 .sidebar__settings-profile-picture-img {
@@ -275,6 +299,8 @@
   outline: none; /* Remove focus outline */
   resize: none; /* Prevent resizing */
   background-color: transparent; /* Transparent background */
+  font-size: 1rem;
+  color: #272b2a;
 }
 
 /* DoneIcon styled to match textarea height */

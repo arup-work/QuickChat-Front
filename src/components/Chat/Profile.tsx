@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 
 import { RootState } from "../../redux";
 import ProfileService from "../../services/ProfileService";
+import { showSuccessToast } from "../../helpers/utils/toastUtils";
+import { ToastContainer } from "react-toastify";
 
 interface ProfileProps {
   handleMenuClick: (menu: string) => void; // Define the function type properly
@@ -21,12 +23,15 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
     setIsEditable(true);
   };
 
-  const handleProfileNameSave = async() => {
+  const handleProfileNameSave = async () => {
     setIsEditable(false);
-    await ProfileService.updateProfileName(auth.token || '', profileName);
+    await ProfileService.updateProfileName(auth.token || '', auth.user?.id || '', profileName);
+    showSuccessToast('Your name changed.');
+
   };
   return (
     <Box className="sidebar__settings">
+      <ToastContainer />
       <Typography variant="h6" className="sidebar__settings-title">
         <Box
           component="span"
@@ -43,6 +48,9 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
           alt="Profile"
           className="sidebar__settings-profile-picture-img"
         />
+        <div className="sidebar__settings-profile-hover-text">
+          Change profile picture
+        </div>
       </Box>
       <Box className="sidebar__settings-profile-container">
         <Typography
@@ -55,7 +63,7 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
           {!isNameEditable ? (
             <>
               <span className="sidebar__settings-profile-name-text">
-                {auth.user?.name}
+                {profileName}
               </span>
               <CreateIcon
                 className="sidebar__settings-profile-icon"

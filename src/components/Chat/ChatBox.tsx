@@ -22,7 +22,6 @@ import { getSocket } from "../../helpers/utils/socket";
 import { formatLastSeen } from "../../helpers/utils/lastseenFormat";
 
 
-const TYPING_TIMEOUT = 3000; // 3 seconds timeout for detecting stop typing
 interface Message {
   senderId: string;
   content: string;
