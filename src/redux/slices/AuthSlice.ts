@@ -5,6 +5,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  file_path: string;
 }
 
 interface AuthState {
@@ -35,6 +36,8 @@ const authenticateSlice = createSlice({
     login(state, action: PayloadAction<{token : string, user: User}>) {
       const { token, user } = action.payload;
 
+      console.log(user);
+      
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 

@@ -214,7 +214,7 @@
   cursor: pointer; /* Changes the cursor to indicate interactivity */
 }
 
-.sidebar__settings-profile-hover-text {
+.sidebar__settings-profile-hover {
   position: absolute; /* Allows positioning over the image */;
   top: 0;
   left: 0;
@@ -232,7 +232,24 @@
   text-align: center;
 }
 
-.sidebar__settings-profile-picture:hover .sidebar__settings-profile-hover-text {
+.sidebar__settings-profile-hover-content{
+  display: flex;
+  flex-direction: column; /* Stack the icon and text vertically */
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__settings-profile-hover-icon {
+  font-size: 14px; /* Adjust icon size */
+  margin-bottom: 8px; /* Add space between icon and text */
+}
+
+.sidebar__settings-profile-hover-text {
+  font-size: 16px; /* Adjust font size */
+  font-weight: bold;
+}
+
+.sidebar__settings-profile-picture:hover .sidebar__settings-profile-hover {
   opacity: 1; /* Show the text on hover */
 }
 
@@ -309,4 +326,39 @@
   cursor: pointer; /* Pointer cursor for interactivity */
   font-size: 1.2rem; /* Match icon size */
   margin-bottom: 10px;
+}
+
+/* Profile Picture Modal */
+
+.profile-modal-container{
+  position: fixed;
+  top: 49%;
+  right: 46%;
+  transform: translate(0, -50%);
+  width: 177px;
+  background-color: white;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Optional shadow */
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+}
+
+.button-icon-text {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Ensures all icons are aligned to the left */
+  gap: 8px; /* Space between the icon and text */
+  width: 100%; /* Ensures consistent button width */
+}
+
+.icon {
+  font-size: 20px; /* Optional: Adjust icon size */
+}
+
+.button-text {
+  flex-grow: 1; /* Ensures the text pushes icons consistently */
+  text-align: left; /* Aligns text to the left */
 }
