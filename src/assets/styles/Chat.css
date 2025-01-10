@@ -332,9 +332,9 @@
 
 .profile-modal-container{
   position: fixed;
-  top: 49%;
-  right: 46%;
-  transform: translate(0, -50%);
+  top: 45%;
+  right: 66%;
+  /* transform: translate(0, -50%); */
   width: 177px;
   background-color: white;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Optional shadow */
