@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
+import { dataURLToBlob } from "../../../helpers/utils/dataURLToBlob";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -24,7 +25,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const [isEnableTakePhoto, setEnableTakePhoto] = useState(false);
 
   const startCamera = async () => {
+    
     try {
+      setEnableTakePhoto(true);
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
       });
@@ -34,7 +37,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         await videoRef.current.play();
         setIsCameraActive(true);
       }
-      setEnableTakePhoto(true);
     } catch (error) {
       console.error("Error accessing camera:", error);
     }
@@ -52,19 +54,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           canvasRef.current.height
         );
         const dataUrl = canvasRef.current.toDataURL("image/png");
+        
         setCapturedImage(dataUrl);
         stopCamera();
         setEnableTakePhoto(false);
+
+        // Convert base64 to Blob
+        const blob = dataURLToBlob(dataUrl);
+        console.log(blob);
+        
+
       }
     }
   };
 
   const stopCamera = () => {
+    setIsCameraActive(false);
+    setCapturedImage(null);
+    
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       const tracks = stream.getTracks();
       tracks.forEach((track) => track.stop());
-      setIsCameraActive(false);
     }
   };
 
@@ -80,7 +91,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     >
       <Box className="profile-modal-container">
         {/* Video element to show live camera feed */}
-        { !capturedImage && (
+        { isEnableTakePhoto && (
           <video ref={videoRef} style={{ width: "100%", height: "auto" }} />
         )}
 
