@@ -4,12 +4,16 @@ import React, { useEffect, useRef, useState } from "react";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
 import { dataURLToBlob } from "../../../helpers/utils/dataURLToBlob";
+import ProfileService from "../../../services/ProfileService";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux";
 
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   OnTakePhoto: () => void;
   onUploadPhoto: () => void;
+  onImageUpload: (url: string) => void;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -17,6 +21,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   OnTakePhoto,
   onUploadPhoto,
+  onImageUpload
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,8 +29,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isEnableTakePhoto, setEnableTakePhoto] = useState(false);
 
+  const auth = useSelector((state: RootState) => state.auth.auth);
+  const currentUser = auth.user?.id;
+
   const startCamera = async () => {
-    
     try {
       setEnableTakePhoto(true);
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -54,16 +61,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           canvasRef.current.height
         );
         const dataUrl = canvasRef.current.toDataURL("image/png");
-        
+
         setCapturedImage(dataUrl);
         stopCamera();
         setEnableTakePhoto(false);
 
         // Convert base64 to Blob
         const blob = dataURLToBlob(dataUrl);
-        console.log(blob);
-        
-
+        uploadImage(blob);
       }
     }
   };
@@ -71,11 +76,27 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const stopCamera = () => {
     setIsCameraActive(false);
     setCapturedImage(null);
-    
+
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       const tracks = stream.getTracks();
       tracks.forEach((track) => track.stop());
+    }
+  };
+
+  const uploadImage = async (image: Blob) => {
+    if (auth && auth.token && auth.user) {
+      const response = await ProfileService.updateProfileImage(
+        auth.token,
+        auth.user?.id,
+        image
+      );
+      const data = response.response;
+      const imageURL = data.imageUrl;
+      
+      // Pass the image URL to the parent component
+      onImageUpload(imageURL);
+      
     }
   };
 
@@ -91,7 +112,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     >
       <Box className="profile-modal-container">
         {/* Video element to show live camera feed */}
-        { isEnableTakePhoto && (
+        {isEnableTakePhoto && (
           <video ref={videoRef} style={{ width: "100%", height: "auto" }} />
         )}
 

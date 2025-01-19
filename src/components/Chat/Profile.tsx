@@ -3,14 +3,15 @@ import React, { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { useSelector } from "react-redux";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "../../redux";
 import ProfileService from "../../services/ProfileService";
 import { showSuccessToast } from "../../helpers/utils/toastUtils";
 import { ToastContainer } from "react-toastify";
 import ProfileModal from "./Modal/ProfileModal";
+import { updateProfileImage } from "../../redux/slices/AuthSlice";
 
 interface ProfileProps {
   handleMenuClick: (menu: string) => void; // Define the function type properly
@@ -21,6 +22,11 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
   const [isNameEditable, setIsEditable] = useState(false);
   const [profileName, setProfileName] = useState(auth.user?.name || "");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(
+    auth.user?.profileImage || "/src/assets/default-profile.png"
+  );
+
+  const dispatch = useDispatch();
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -28,23 +34,36 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
 
   const handleProfileNameSave = async () => {
     setIsEditable(false);
-    await ProfileService.updateProfileName(auth.token || '', auth.user?.id || '', profileName);
-    showSuccessToast('Your name changed.');
+    await ProfileService.updateProfileName(
+      auth.token || "",
+      auth.user?.id || "",
+      profileName
+    );
+    showSuccessToast("Your name changed.");
+  };
+
+  // Callback function to update the image URL from the child component
+  const handleImageUpdate = (imageURL: string) => {
+    setProfileImage(imageURL);
+    setModalOpen(false);
+
+    // Dispatch action to update Redux state and localStorage
+    dispatch(updateProfileImage(imageURL));
   };
 
   const handleTakePhoto = () => {
     console.log("Take Photo Clicked");
     setModalOpen(false);
-  }
+  };
 
   const handleUploadPhoto = () => {
     console.log("Upload photo clicked");
     setModalOpen(false);
-  }
+  };
 
   const toggleModal = (open: boolean) => {
     setModalOpen(open);
-  }
+  };
 
   return (
     <>
@@ -60,9 +79,12 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
           </Box>
           <span className="sidebar__settings-text">Profile</span>
         </Typography>
-        <Box className="sidebar__settings-profile-picture" onClick={() => toggleModal(true)}>
+        <Box
+          className="sidebar__settings-profile-picture"
+          onClick={() => toggleModal(true)}
+        >
           <img
-            src="/src/assets/default-profile.png" /* Replace with your default image path */
+            src={profileImage} /* Replace with your default image path */
             alt="Profile"
             className="sidebar__settings-profile-picture-img"
           />
@@ -70,7 +92,9 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
             <Box className="sidebar__settings-profile-hover-content">
               <CameraAltIcon className="sidebar__settings-profile-hover-icon" />
               <Box className="sidebar__settings-profile-hover-text">
-                {auth.user?.file_path ? 'Change profile picture' : 'Upload profile picture'}
+                {auth.user?.profileImage
+                  ? "Change profile picture"
+                  : "Upload profile picture"}
               </Box>
             </Box>
           </div>
@@ -113,7 +137,13 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
       </Box>
 
       {/* Profile modal */}
-      <ProfileModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} OnTakePhoto={handleTakePhoto} onUploadPhoto={handleUploadPhoto} />
+      <ProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        OnTakePhoto={handleTakePhoto}
+        onUploadPhoto={handleUploadPhoto}
+        onImageUpload={handleImageUpdate}
+      />
     </>
   );
 };

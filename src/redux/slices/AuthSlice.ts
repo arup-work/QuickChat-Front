@@ -5,7 +5,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  file_path: string;
+  profileImage: string;
 }
 
 interface AuthState {
@@ -53,8 +53,20 @@ const authenticateSlice = createSlice({
       state.isAuthenticated = false;
       state.auth = { token: null, user: null };
     },
+
+    // Function to update profile image
+    updateProfileImage(state, action: PayloadAction<string>) {
+      const newProfileImage = action.payload;
+      if (state.auth.user) {
+        state.auth.user.profileImage = newProfileImage;
+
+         // Update localStorage
+         const updateUser = { ...state.auth.user, profileImage: newProfileImage};
+         localStorage.setItem("user", JSON.stringify(updateUser));
+      }
+    }
   },
 });
 
-export const {login, logout } = authenticateSlice.actions;
+export const {login, logout, updateProfileImage  } = authenticateSlice.actions;
 export default authenticateSlice.reducer;

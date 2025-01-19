@@ -19,6 +19,27 @@ const ProfileService = {
       return { data: null, error: errorMessage };
     }
   },
+
+  updateProfileImage: async(token: string, userId: string, image: Blob) => {
+    const formData = new FormData();
+    formData.append('image',image);
+
+    try {
+      const bearerToken = { Authorization: `Bearer ${token}` };
+      const response = await apiRequest(
+        `user/update-profile-image/${userId}`,
+        "POST",
+        formData,
+        bearerToken
+      );
+      return response;
+    } catch (error) {
+      const errorMessage =
+        (error as Error).message || "An error occurred while fetching users.";
+      showErrorToast(errorMessage);
+      return { data: null, error: errorMessage };
+    }
+  }
 };
 
 export default ProfileService;
