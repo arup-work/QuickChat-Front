@@ -255,7 +255,7 @@
 
 .sidebar__settings-profile-picture-img {
   width: 100%; /* Make the image fill the container */
-  height: 100%; /* Ensure the image covers the entire circle */
+  height: 50%; /* Ensure the image covers the entire circle */
   object-fit: cover; /* Ensures the image is not stretched */
 }
 

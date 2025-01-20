@@ -44,8 +44,8 @@ const ProfileService = {
     try {
       const bearerToken = { Authorization: `Bearer ${token}` };
       const response = await apiRequest(
-        `user/update-profile-image/${userId}`,
-        "POST",
+        `user/remove-profile-image/${userId}`,
+        "DELETE",
         null,
         bearerToken
       );

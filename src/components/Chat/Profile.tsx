@@ -54,8 +54,12 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
 
   // Callback function to remove the image URL from the child component
   const handleRemoveImage = () => {
-    setProfileImage("");
+    setProfileImage("/src/assets/default-profile.png");
     setModalOpen(false);
+
+    // Dispatch action to update Redux state and localStorage
+    dispatch(updateProfileImage(""));
+    showSuccessToast("Your profile image updated.");
   }
 
   const handleTakePhoto = () => {
@@ -150,6 +154,7 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
         OnTakePhoto={handleTakePhoto}
         onUploadPhoto={handleUploadPhoto}
         onImageUpload={handleImageUpdate}
+        onImageDelete={handleRemoveImage}
       />
     </>
   );

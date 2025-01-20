@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
-import DeleteIcon from '@mui/icons-material/DeleteOutline';
+import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import { dataURLToBlob } from "../../../helpers/utils/dataURLToBlob";
 import ProfileService from "../../../services/ProfileService";
 import { useSelector } from "react-redux";
@@ -15,6 +15,7 @@ interface ProfileModalProps {
   OnTakePhoto: () => void;
   onUploadPhoto: () => void;
   onImageUpload: (url: string) => void;
+  onImageDelete: () => void;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -22,6 +23,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUploadPhoto,
   onImageUpload,
+  onImageDelete,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,6 +100,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
+  const removeImage = async () => {
+    if (auth && auth.token && auth.user) {
+      const response = await ProfileService.removeProfileImage(
+        auth.token,
+        auth.user?.id
+      );
+      console.log(response);
+
+      // Pass the image URL to the parent component
+      onImageDelete();
+    }
+  };
+
   return (
     <Modal
       open={isOpen}
@@ -155,22 +170,27 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </Box>
             </Button>
 
-            {/* Horizontal line between the buttons */}
-            <Divider sx={{ my: 1 }} />
+            {auth.user?.profileImage && (
+              <>
+                {/* Horizontal line between the buttons */}
+                <Divider sx={{ my: 1 }} />
 
-            <Button
-              variant="text"
-              color="primary"
-              sx={{ textTransform: "none" }}
-              onClick={onUploadPhoto}
-            >
-              <Box className="button-icon-text">
-                <DeleteIcon className="icon" />
-                <Typography variant="body1" className="button-text">
-                  Remove photo
-                </Typography>
-              </Box>
-            </Button>
+                <Button
+                  variant="text"
+                  color="primary"
+                  sx={{ textTransform: "none" }}
+                  onClick={removeImage}
+                >
+                  <Box className="button-icon-text">
+                    <DeleteIcon className="icon" />
+                    <Typography variant="body1" className="button-text">
+                      Remove photo
+                    </Typography>
+                  </Box>
+                </Button>
+              </>
+            )}
+
             <Divider sx={{ my: 1 }} />
           </>
         )}
