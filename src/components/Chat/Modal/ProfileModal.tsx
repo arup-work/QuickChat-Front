@@ -1,8 +1,9 @@
-import { Box, Button, Modal, Typography } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import { Box, Button, Divider, Modal, Typography } from "@mui/material";
+import React, { useRef, useState } from "react";
 
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
+import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { dataURLToBlob } from "../../../helpers/utils/dataURLToBlob";
 import ProfileService from "../../../services/ProfileService";
 import { useSelector } from "react-redux";
@@ -19,9 +20,8 @@ interface ProfileModalProps {
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   onClose,
-  OnTakePhoto,
   onUploadPhoto,
-  onImageUpload
+  onImageUpload,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,7 +30,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const [isEnableTakePhoto, setEnableTakePhoto] = useState(false);
 
   const auth = useSelector((state: RootState) => state.auth.auth);
-  const currentUser = auth.user?.id;
 
   const startCamera = async () => {
     try {
@@ -93,10 +92,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       );
       const data = response.response;
       const imageURL = data.imageUrl;
-      
+
       // Pass the image URL to the parent component
       onImageUpload(imageURL);
-      
     }
   };
 
@@ -156,6 +154,24 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </Typography>
               </Box>
             </Button>
+
+            {/* Horizontal line between the buttons */}
+            <Divider sx={{ my: 1 }} />
+
+            <Button
+              variant="text"
+              color="primary"
+              sx={{ textTransform: "none" }}
+              onClick={onUploadPhoto}
+            >
+              <Box className="button-icon-text">
+                <DeleteIcon className="icon" />
+                <Typography variant="body1" className="button-text">
+                  Remove photo
+                </Typography>
+              </Box>
+            </Button>
+            <Divider sx={{ my: 1 }} />
           </>
         )}
 

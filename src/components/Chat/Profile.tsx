@@ -49,7 +49,14 @@ const Profile: React.FC<ProfileProps> = ({ handleMenuClick }) => {
 
     // Dispatch action to update Redux state and localStorage
     dispatch(updateProfileImage(imageURL));
+    showSuccessToast("Your profile image updated.");
   };
+
+  // Callback function to remove the image URL from the child component
+  const handleRemoveImage = () => {
+    setProfileImage("");
+    setModalOpen(false);
+  }
 
   const handleTakePhoto = () => {
     console.log("Take Photo Clicked");
